@@ -19,6 +19,7 @@ import { useEffect, useState } from "react";
 import { staticScores, LeaderboardEntry } from "../data/staticScores";
 import { getCurrentUserScore } from "../utils/answerTracker";
 import {} from "@mui/material";
+import { useAuth } from "../context/AuthContext";
 
 type Reward = {
   name: string;
@@ -41,17 +42,18 @@ export default function Leaderboard() {
   const [selectedReward, setSelectedReward] = useState<Reward | null>(null);
   const [contact, setContact] = useState({ name: "", email: "", address: "" });
   const [userCoins, setUserCoins] = useState<number>(0);
+  const { user } = useAuth();
 
   useEffect(() => {
-    const currentUserRaw = getCurrentUserScore();
+    const currentUserRaw = getCurrentUserScore(user);
     const score = currentUserRaw ?? 0;
 
     const coinData = JSON.parse(localStorage.getItem("user_coins") || "{}");
-    const coins = coinData["you"] ?? 0;
+    const coins = coinData[user || ""] ?? 0;
 
     const currentUser: LeaderboardEntry = {
-      uid: "you",
-      name: "You",
+      uid: user,
+      name: user || "You",
       score,
     };
 
@@ -59,7 +61,7 @@ export default function Leaderboard() {
       (a, b) => b.score - a.score
     );
 
-    const userRank = combined.findIndex((entry) => entry.uid === "you") + 1;
+    const userRank = combined.findIndex((entry) => entry.uid === user) + 1;
 
     setLeaderboard(combined);
     setUserScore(score);
@@ -86,7 +88,7 @@ export default function Leaderboard() {
                 <Typography variant="h5" gutterBottom>
                   🏆 Leaderboard
                 </Typography>
-                {userRank && (
+                {user && userRank && (
                   <Box
                     sx={{
                       p: 2,
@@ -108,51 +110,56 @@ export default function Leaderboard() {
                     </Typography>
                   </Box>
                 )}
+
                 <List
                   sx={{
                     maxHeight: "70vh",
                     overflowY: "auto",
                   }}
                 >
-                  {leaderboard.map((user, i) => {
-                    const isCurrentUser = user.uid === "you";
+                  {leaderboard
+                    .filter((entry) => user || entry.uid !== user) // Hide user entry when not logged in
+                    .map((entry, i) => {
+                      const isCurrentUser = entry.uid === user;
 
-                    return (
-                      <ListItem
-                        key={user.uid}
-                        divider
-                        sx={{
-                          bgcolor: isCurrentUser ? "#e3f2fd" : "inherit",
-                          borderRadius: 1,
-                        }}
-                      >
-                        <ListItemText
-                          primary={
-                            <Typography
-                              sx={{ fontWeight: isCurrentUser ? 700 : 400 }}
-                              color={
-                                isCurrentUser ? "primary.main" : "text.primary"
-                              }
-                            >
-                              {`${i + 1}. ${user.name}`}
-                            </Typography>
-                          }
-                          secondary={
-                            <Typography
-                              sx={{ fontWeight: isCurrentUser ? 600 : 400 }}
-                              color={
-                                isCurrentUser
-                                  ? "primary.dark"
-                                  : "text.secondary"
-                              }
-                            >
-                              {`${user.score} pts`}
-                            </Typography>
-                          }
-                        />
-                      </ListItem>
-                    );
-                  })}
+                      return (
+                        <ListItem
+                          key={entry.uid}
+                          divider
+                          sx={{
+                            bgcolor: isCurrentUser ? "#e3f2fd" : "inherit",
+                            borderRadius: 1,
+                          }}
+                        >
+                          <ListItemText
+                            primary={
+                              <Typography
+                                sx={{ fontWeight: isCurrentUser ? 700 : 400 }}
+                                color={
+                                  isCurrentUser
+                                    ? "primary.main"
+                                    : "text.primary"
+                                }
+                              >
+                                {`${i + 1}. ${entry.name}`}
+                              </Typography>
+                            }
+                            secondary={
+                              <Typography
+                                sx={{ fontWeight: isCurrentUser ? 600 : 400 }}
+                                color={
+                                  isCurrentUser
+                                    ? "primary.dark"
+                                    : "text.secondary"
+                                }
+                              >
+                                {`${entry.score} pts`}
+                              </Typography>
+                            }
+                          />
+                        </ListItem>
+                      );
+                    })}
                 </List>
               </Paper>
             </Grid>
@@ -163,9 +170,11 @@ export default function Leaderboard() {
                 <Typography variant="h5" gutterBottom>
                   🎁 Redeem Rewards
                 </Typography>
-                <Typography variant="subtitle1" color="primary" gutterBottom>
-                  Your coins: <strong>{userCoins}</strong>
-                </Typography>
+                {user && (
+                  <Typography variant="subtitle1" color="primary" gutterBottom>
+                    Your coins: <strong>{userCoins}</strong>
+                  </Typography>
+                )}
 
                 <Divider sx={{ mb: 2 }} />
                 <Box display="flex" flexDirection="column" gap={2}>
@@ -254,7 +263,9 @@ export default function Leaderboard() {
               const coins = JSON.parse(
                 localStorage.getItem("user_coins") || "{}"
               );
-              coins["you"] = newCoins;
+              if (user) {
+                coins[user] = newCoins;
+              }
               localStorage.setItem("user_coins", JSON.stringify(coins));
 
               // Optional: Send contact info to backend

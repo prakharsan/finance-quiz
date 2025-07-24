@@ -32,7 +32,8 @@ export function hasAnsweredToday(username: string, date: string): boolean {
   return !!answer;
 }
 
-export function getCurrentUserScore(): number {
+export function getCurrentUserScore(username: string | null): number {
+  if (username == null) return 0;
   const scores = JSON.parse(localStorage.getItem("user_scores") || "{}");
-  return scores["you"] || 0;
+  return scores[username] || 0;
 }

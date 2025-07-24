@@ -1,6 +1,6 @@
 export type LeaderboardEntry = {
-  uid: string;
-  name: string;
+  uid: string | null;
+  name: string | null;
   score: number;
 };
 

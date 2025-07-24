@@ -65,12 +65,14 @@ export default function Home() {
       points: isCorrect ? 10 : 0,
     });
 
+    const username = user;
+
     const scores = JSON.parse(localStorage.getItem("user_scores") || "{}");
-    scores["you"] = (scores["you"] || 0) + (isCorrect ? 10 : 0);
+    scores[username] = (scores[username] || 0) + (isCorrect ? 10 : 0);
     localStorage.setItem("user_scores", JSON.stringify(scores));
 
     const coins = JSON.parse(localStorage.getItem("user_coins") || "{}");
-    coins["you"] = (coins["you"] || 0) + (isCorrect ? 10 : 0);
+    coins[username] = (coins[username] || 0) + (isCorrect ? 10 : 0);
     localStorage.setItem("user_coins", JSON.stringify(coins));
 
     setSubmitted(true);
@@ -268,7 +270,6 @@ export default function Home() {
               color: "#fff",
               boxShadow: "0 4px 20px rgba(0,0,0,0.2)",
             }}
-            color="primary"
           >
             <Box display="flex" alignItems="center" mb={1}>
               <Typography variant="h6" sx={{ fontWeight: 600 }} color="primary">
@@ -276,35 +277,57 @@ export default function Home() {
               </Typography>
             </Box>
 
-            <Typography
-              variant="h5"
-              color="primary"
-              sx={{ fontWeight: 600, mb: 1 }}
-            >
-              {course.title}
-            </Typography>
+            {user ? (
+              <>
+                <Typography
+                  variant="h5"
+                  color="primary"
+                  sx={{ fontWeight: 600, mb: 1 }}
+                >
+                  {course.title}
+                </Typography>
 
-            <Box sx={{ mt: 2 }}>
-              <Typography
-                variant="body2"
-                color="textSecondary"
-                sx={{ mb: 0.5 }}
-              >
-                Progress: {course.completedPercent}%
-              </Typography>
-              <LinearProgress
-                variant="determinate"
-                value={course.completedPercent}
-                sx={{
-                  height: 8,
-                  borderRadius: 5,
-                  backgroundColor: "#f0f0f0",
-                  "& .MuiLinearProgress-bar": {
-                    backgroundColor: theme.palette.primary.main,
-                  },
-                }}
-              />
-            </Box>
+                <Box sx={{ mt: 2 }}>
+                  <Typography
+                    variant="body2"
+                    color="textSecondary"
+                    sx={{ mb: 0.5 }}
+                  >
+                    Progress: {course.completedPercent}%
+                  </Typography>
+                  <LinearProgress
+                    variant="determinate"
+                    value={course.completedPercent}
+                    sx={{
+                      height: 8,
+                      borderRadius: 5,
+                      backgroundColor: "#f0f0f0",
+                      "& .MuiLinearProgress-bar": {
+                        backgroundColor: theme.palette.primary.main,
+                      },
+                    }}
+                  />
+                </Box>
+              </>
+            ) : (
+              <>
+                <Typography
+                  variant="body1"
+                  color="primary"
+                  sx={{ fontWeight: 500, mb: 2 }}
+                >
+                  Explore bite-sized finance courses to build your money skills!
+                </Typography>
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ mb: 1 }}
+                >
+                  Login to start tracking your progress and earn rewards.
+                </Typography>
+              </>
+            )}
+
             <Box mt={3}>
               <Button
                 variant="outlined"
