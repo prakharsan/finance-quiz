@@ -185,20 +185,20 @@ export default function Leaderboard() {
                         p: 2,
                         borderRadius: 2,
                         backgroundColor:
-                          userScore >= reward.cost ? "#e6ffed" : "#f0f0f0",
+                          userCoins >= reward.cost ? "#e6ffed" : "#f0f0f0",
                         border: "1px solid",
                         borderColor:
-                          userScore >= reward.cost ? "#81c784" : "#ccc",
+                          userCoins >= reward.cost ? "#81c784" : "#ccc",
                         cursor:
-                          userScore >= reward.cost ? "pointer" : "not-allowed",
-                        opacity: userScore >= reward.cost ? 1 : 0.6,
+                          userCoins >= reward.cost ? "pointer" : "not-allowed",
+                        opacity: userCoins >= reward.cost ? 1 : 0.6,
                         transition: "0.3s",
                         "&:hover": {
-                          boxShadow: userScore >= reward.cost ? 4 : "none",
+                          boxShadow: userCoins >= reward.cost ? 4 : "none",
                         },
                       }}
                       onClick={() => {
-                        if (userScore >= reward.cost) {
+                        if (userCoins >= reward.cost) {
                           handleRedeem(reward);
                         }
                       }}
